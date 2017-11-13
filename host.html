@@ -1,0 +1,487 @@
+{% extends 'master.html' %}
+
+{% block title %}主机管理{% endblock %}
+
+{% block content %}
+    <h1 class="page-header" style="font-size: 28px;">主机管理</h1>
+    {% include 'operation.html' %}
+    <div style="margin-top: 10px;">
+        <!--<table id="host-table" border="1" width="100%">-->
+        <table class="table table-bordered table-striped table-hover">
+            <thead>
+                <!--<tr class="host-tr">-->
+                <tr>
+                    <th>选择</th>
+                    <th>序号</th>
+                    <th>主机名</th>
+                    <th>IP地址</th>
+                    <th>业务线名称</th>
+                    <th>所在机房名称</th>
+                    <th>编辑</th>
+                    <th>删除</th>
+                </tr>
+            </thead>
+            <tbody id="tb">
+                {% for row in hosts %}
+                    <tr hid="{{ row.id }}" bid="{{ row.b_id }}" eid="{{ row.e_id }}"> <!--自定义属性，用户在页面上也看不到这两个值，主机id、业务线id、机房id-->
+                        <td style="text-align: center">
+                            <input type="checkbox" />
+                        </td>
+                        <td>{{ forloop.counter }}</td> <!--forloop.counter0,计数从0开始，没循环一次，+1-->
+                        <td>{{ row.hostname }}</td>    <!--forloop.revcounter,倒序排-->
+                        <td>{{ row.ip }}</td>           <!--forloop.revcounter0,倒序排，最下面是0-->
+                        <td>{{ row.b.caption }}</td>    <!--forloop.first,是否是第一个--> <!--forloop.last,是否是最后一个-->
+                        <td>{{ row.e.name }}</td>
+                        <td style="text-align:center;">                           <!--forloop.parentloop,外层循环-->
+                            <a class="edit-single-host">
+                                <span class="glyphicon glyphicon-edit" aria-hidden="true" data-toggle="modal" data-target="#editModal"></span>
+                            </a>
+                        </td>
+                        <td style="text-align:center;">
+                            <a class="delete—single-host">
+                                <span class="glyphicon glyphicon-trash" aria-hidden="true" data-toggle="modal" data-target="#delSignalModal"></span>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <div style="display: inline;float: left;margin-top: 10px;">
+            共 {{ data_length }} 条数据，每页显示
+            <select id="ps" onchange="changePageSize(this)"> <!--让用户选择每页显示多少数据-->
+                <option value="10">10</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            条
+        </div>
+        <!--页码-->
+        <div class="pagination" style="display: inline;float: right;margin-top: 5px;">
+            {{ page_str }}
+        </div>
+    </div>
+
+
+{#    <!--添加-->#}
+{#    <div class="add-modal hide"> <!--所有标签里面的name属性都是为了让后台知道你选的是哪个标签，input标签发到后台的是文本框中的内容，select发到你后台的是option的value-->#}
+{#        <form id="add-form" method="POST" action="/host/">#}
+{#            {% csrf_token %}#}
+{#            <div class="group">#}
+{#                <label for="host">主机名：</label>#}
+{#                <input id="hostname" type="text" placeholder="主机名" name="hostname" />#}
+{#            </div>#}
+{##}
+{#            <div class="group">#}
+{#                <label for="ip">IP地址：</label>#}
+{#                <input id="ip" type="text" placeholder="IP" name="ip" />#}
+{#            </div>#}
+{##}
+{#            <div class="group">#}
+{#                <label for="business">所属业务线：</label>#}
+{#                <select id="business_id" name="b_id"> <!--业务线，只让选择-->#}
+{#                    {% for op in b_list %}#}
+{#                    <option value="{{ op.id }}">{{ op.caption }}</option>#}
+{#                    {% endfor %}#}
+{#                </select>#}
+{#            </div>#}
+{##}
+{#            <div class="group">#}
+{#                <label for="e">所在机房：</label>#}
+{#                <select id="engineroom_id" name="e_id"> <!--所在机房，只让选择-->#}
+{#                    {% for op in e_list %}#}
+{#                    <option value="{{ op.id }}">{{ op.name }}</option>#}
+{#                    {% endfor %}#}
+{#                </select>#}
+{#            </div>#}
+{##}
+{#            <!--<input type="submit" value="提交" />--> <!--提交只能提交表单，讲完ajax以后才可以不用表单提交-->#}
+{#            <input id="ajax_add_submit" type="button" value="提交">#}
+{#            <input id="cancel" type="button" value="取消" />#}
+{#            <span id="error_msg" style="color: red"></span>#}
+{#        </form>#}
+{#    </div>#}
+
+
+    <!--Bootstrap add modal-->
+    <div id="addModal" class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel" style="text-align: center;">添加主机</h4>
+          </div>
+          <div class="modal-body">
+              <form class="form-horizontal" id="add-form" method="POST" action="/host/" style="text-align: center;">
+                  {% csrf_token %}
+                  <div class="form-group">
+                    <label for="host" class="col-sm-2 control-label">主机名</label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control" id="hostname" name="hostname" placeholder="hostname">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="ip" class="col-sm-2 control-label">IP地址</label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control" id="ip" name="ip" placeholder="IP">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                      <label for="business" style="padding-top: 7px;margin-bottom: 0;text-align: right;">所属业务线</label>
+                      <select id="business_id" name="b_id" class="form-control" style="width: 470px;display: inline;margin-left: 23px;"> <!--业务线，只让选择-->
+                          {% for op in b_list %}
+                              <option value="{{ op.id }}">{{ op.caption }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+                  <div class="form-group">
+                      <label for="e" style="padding-top: 7px;margin-bottom: 0;margin-left: 12px;text-align: right;">所在机房</label>
+                      <select id="engineroom_id" name="e_id" class="form-control" style="width: 470px;display: inline;margin-left: 23px;"> <!--所在机房，只让选择-->
+                          {% for op in e_list %}
+                              <option value="{{ op.id }}">{{ op.name }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+              </form>
+          </div>
+          <div class="modal-footer" style="text-align: center;">
+              <!--<input type="submit" value="提交" />--> <!--提交只能提交表单，讲完ajax以后才可以不用表单提交-->
+              <input id="ajax_add_submit" type="button" class="btn btn-primary" value="提交">
+              <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+              <span id="error_msg" style="color: red"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Bootstrap edit modal -->
+    <div id="editModal" class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel" style="text-align: center;">编辑主机</h4>
+          </div>
+          <div class="modal-body">
+              <form class="form-horizontal" id="edit-form" method="POST" action="/host/" style="text-align: center;">
+                  {% csrf_token %}
+                  <input type="text" name="hid" style="display:none" />
+                  <div class="form-group">
+                    <label for="hostname" class="col-sm-2 control-label">主机名</label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control" id="hostname" name="hostname" placeholder="hostname">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="IP" class="col-sm-2 control-label">IP地址</label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control" id="ip" name="ip" placeholder="IP">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                      <label for="business" style="padding-top: 7px;margin-bottom: 0;text-align: right;">所属业务线</label>
+                      <select id="business_id" name="b_id" class="form-control" style="width: 470px;display: inline;margin-left: 23px;"> <!--业务线，只让选择-->
+                          {% for op in b_list %}
+                              <option value="{{ op.id }}">{{ op.caption }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+                  <div class="form-group">
+                      <label for="e" style="padding-top: 7px;margin-bottom: 0;margin-left: 12px;text-align: right;">所在机房</label>
+                      <select id="engineroom_id" name="e_id" class="form-control" style="width: 470px;display: inline;margin-left: 23px;"> <!--所在机房，只让选择-->
+                          {% for op in e_list %}
+                              <option value="{{ op.id }}">{{ op.name }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+              </form>
+          </div>
+          <div class="modal-footer" style="text-align: center;">
+              <input id="ajax_edit_submit" type="button" class="btn btn-primary" value="确认编辑">
+              <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+              <span id="error_msg" style="color: red"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap del modal -->
+    <div id="delSignalModal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">确定要删除吗？</h4>
+          </div>
+          <div class="modal-body" style="text-align: center;">
+              <form id="del_form" method="POST" action="/delete_host/">
+                {% csrf_token %}
+                <input id="del_host_id" type="text" name="hid" style="display:none" />
+                <input type="submit" value="删除" />
+                <!--<a id="ajax_submit_del">确认删除</a>-->
+                <input type="button" value="取消" data-dismiss="modal" />
+              </form>
+          </div>
+{#          <div class="modal-footer">#}
+{#            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>#}
+{#            <button type="button" class="btn btn-primary">Save changes</button>#}
+{#          </div>#}
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $.ajaxSetup({
+            beforeSend: function(xhr,settings){
+                xhr.setRequestHeader('X-CSRFtoken', $.cookie('csrftoken'));
+            }
+        });
+
+        $(document).ready(function(){
+            $('.pg-content,.item,#host').removeClass('hide');
+        });
+
+        function checkAll() {
+            $('#tb :checkbox').prop('checked',true); //prop()帮你循环去做了
+        }
+        function cancleAll() {
+            $('#tb :checkbox').prop('checked',false);
+        }
+        function reverseAll() {
+            $('#tb :checkbox').each(function(k){ //jQuery中的循环，each会循环你选中的所有标签，只要在each()中写一个函数，每个循环都会执行下这个函数。这个函数还可以加参数，这个k是索引的下标。
+                // 这里的this，代指当前循环的每一个元素。这里的this是DOM对象，你可以打印下console.log(this); console.log($(this));
+                //通过三元运算来实现反选。 三元运算var v = 条件? 真值：假值
+                var v = $(this).prop('checked')?false:true;
+                $(this).prop('checked',v);
+            })
+        }
+
+        //添加主机
+        $('#ajax_add_submit').click(function(){
+            $.ajax({
+                url: "/host/",
+                type: 'POST',
+                //data: {'hostname': $('#host').val(), 'ip': $('#ip').val(), 'port': $('#port').val(), 'b_id': $('#sel').val()},
+                data: $('#add-form').serialize(),
+                success: function(data){
+                    //console.log(data);
+                    var obj = JSON.parse(data); //把字符串转换为对象
+                    if(obj.status){
+                        location.reload(); //js刷新页面
+                    }else{
+                        $('#add-form #error_msg').text(obj.error);
+                    }
+                }
+            })
+        });
+
+        //编辑主机
+        $('.edit-single-host').click(function(){
+            var hid = $(this).parent().parent().attr('hid'); //点编辑按钮时拿到当前主机的id
+            var bid = $(this).parent().parent().attr('bid'); //点编辑按钮时拿到当前主机所在业务线的id
+            var eid = $(this).parent().parent().attr('eid'); //点编辑按钮时拿到当前主机所在机房的id
+            var hostname = $(this).parent().prev().prev().prev().prev().text();
+            var ip = $(this).parent().prev().prev().prev().text();
+            //console.log(hid);
+            //console.log(hostname);
+            //console.log(ip);
+
+            $('#edit-form #business_id').val(bid);
+            $('#edit-form #engineroom_id').val(eid);
+            $('#edit-form').find('input[name="hid"]').val(hid); //放到那个隐藏的input框中
+            $('#edit-form').find('[id="hostname"]').val(hostname);
+            $('#edit-form').find('[id="ip"]').val(ip);
+        })
+        $('#ajax_edit_submit').click(function(){
+            $.ajax({
+                url: "/edit_host/",
+                type: 'POST',
+                data: $('#edit-form').serialize(),
+                success: function(data){
+                    console.log(data);
+                    var obj = JSON.parse(data); //把字符串转换为对象
+                    if(obj.status){
+                        location.reload(); //js刷新页面
+                    }else{
+                        $('#edit-form #error_msg').text(obj.error);
+                    }
+                }
+            })
+        });
+
+        //批量删除主机
+        $('#delete-batch').click(function(){
+            var hid_arry = [];
+            $('#tb :checkbox').each(function(k){
+                if(this.checked){
+                    var hid = $(this).parent().parent().attr('hid');
+                    hid_arry.push(hid);
+                }
+            })
+
+            /*for(var item in hid_arry){
+                console.log(hid_arry[item]); //这个item是索引
+            }*/
+
+            var hid_str = JSON.stringify(hid_arry);
+            //console.log(hid_str);
+            //var new_hid = JSON.parse(hid_str);
+            //console.log(new_hid);
+            //$('#del_form').find('input[name="hid"]').val(hid_str); //塞到表单里的input标签
+            $('#del_form').find('input[name="hid"]').val(hid_arry); //塞到表单里的input标签
+        });
+
+        //删除单个主机
+        $('.delete—single-host').click(function(){
+            //console.log('111');
+            var hid = $(this).parent().parent().attr('hid'); //点删除按钮时拿到当前主机的id
+            //console.log(hid);
+            $('#del_form').find('input[name="hid"]').val(hid); //塞到表单里，这样后台就可以取到要删除的这行数据
+
+        })
+        $('#ajax_submit_del').click(function () {
+            $.ajax({
+                url: '/delete_host/',
+                type: 'POST',
+                //data: {'hid': $('#del_host_id').val()},
+                data: $('#del_form').serialize(),
+                dataType: 'JSON',
+                traditional: true,
+                success: function (obj) {
+                    console.log(obj)
+                },
+                error: function () {
+
+                }
+            })
+        })
+
+
+        $(function(){ //客户端也是可以设置Cookies，不只是服务器端可以设置Cookies
+            if(! $.cookie('per_page_count')) {
+                $.cookie('per_page_count', 10);
+            }
+            var v = $.cookie('per_page_count'); //页面框架加载完成后，先找到cookies中的值
+            $('#ps').val(v); //然后checkbox里面的值设置为Cookies中获取到的值
+        });
+        function changePageSize(ths){
+            var v = $(ths).val(); //用户当前checkbox选择的value
+            //$.cookie('per_page_count',v, {path: "/host/"}); //原来jquery里面没有$.cookie
+            $.cookie('per_page_count',v); //这和服务端设置cookie path不一样，在默认情况下，只有设置cookie的网页才能读取该cookie，如果想让一个页面读取另一个页面设置的cookie，必须设置cookie的路径，cookies的路径用于设置能够读取cookie的顶级目录，将这个路径设置为网站的根目 录，可以让所有网页都能互相读取cookie（一般不要这样设置，防止出现冲突）
+                                //为什么加{'path': "/user_list/"}，因为如果你有其他的项目表格选择，比如主机列表在其他url，那个url不一定想要一页显示30条，所以要设置只对当前url生效
+            location.reload(); //选择完刷新页面
+        }
+    </script>
+{% endblock %}
+
+
+{% block css %}
+    <style>
+        .host-header {
+            height: 30px;
+            line-height: 30px;
+            margin-left: 10px;
+            margin-top: 10px;
+            font-size: 20px;
+        }
+        .operation {
+            margin-top: 10px;
+        }
+        #host-table {
+            padding: 0;
+            margin-top: 5px;
+            border-collapse: collapse;
+        }
+        #host-table th {
+            border: 1px solid #C1DAD7;
+{#            background: #fff;#}
+            background: #F5FAFA;
+            font-size: 15px;
+            padding: 6px 6px 6px 12px;
+            color: #4f6b72;
+        }
+        #host-table td {
+            border: 1px solid #C1DAD7;
+            font-size: 15px;
+            padding: 6px 6px 6px 12px;
+{#            color: #4f6b72;#}
+        }
+        .edit-single-host {
+            text-decoration:none;
+            color: #086ed5;
+            cursor: pointer;
+        }
+        .delete—single-host {
+            text-decoration:none;
+            color: #086ed5;
+            cursor: pointer;
+        }
+
+        .hide{
+            display: none;
+        }
+        .shade{
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            background: black;
+            opacity: 0.6;
+            z-index: 100;
+        }
+        .add-modal, .edit-modal{
+            position: fixed;
+            height: 300px;
+            width: 400px;
+            top:100px;
+            left: 50%;
+            z-index: 101;
+            border: 1px solid red;
+            background: #e6e6e6;
+            margin-left: -200px;
+            text-align: center;
+        }
+        .del-modal{
+            position: fixed;
+            height: 100px;
+            width: 200px;
+            top: 200px;
+            left: 50%;
+            z-index: 101;
+            border: 1px solid red;
+            background: white;
+            margin-left: -100px;
+            text-align: center;
+        }
+
+        .pagination .page{
+            display: inline-block;
+            padding: 5px;
+            background-color: #f1f1f1;
+            margin: 5px;
+            text-decoration:none;
+        }
+        .pagination .page.active{
+            background-color: #086ed5;
+            color: white;
+            text-decoration:none;
+        }
+        .pagination .page_num{
+            width: 25px;
+        }
+    </style>
+{% endblock %}
+
+
+
+
+
