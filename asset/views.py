@@ -28,8 +28,8 @@ def login(request):
             request.session['is_login'] = True
             if request.POST.get('rememberMe', None) == '1':
                 request.session.set_expiry(604800)
-            # print(request.path_info)
-            return redirect('/host/')
+
+            return redirect(request.session['login_from'])
         else:
             error_msg = "密码错误"
             return render(request, 'login.html', {'error_msg': error_msg})
@@ -38,6 +38,10 @@ def auth(func):
     '''FBV装饰器实现认证，防止多个url需要认证'''
     def inner(request, *args, **kwargs):
         if not request.session.get('username', None):
+            # 记住来源的url，如果没有则设置为首页('/')
+            # request.session['login_from'] = request.META.get('HTTP_REFERER', '/index/')
+            request.session['login_from'] = request.path
+            print(request.session['login_from'])
             return redirect('/login/')
         return func(request, *args, **kwargs)
     return inner
@@ -47,10 +51,13 @@ def logout(request):
     request.session.clear()
     return redirect('/login/')
 
-
+'''
+主页
+'''
+@auth
 def index(request):
     '''主页'''
-    pass
+    return HttpResponse("ni hao...")
 
 '''
 主机管理
