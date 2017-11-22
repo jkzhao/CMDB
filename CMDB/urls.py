@@ -28,4 +28,6 @@ urlpatterns = [
     url(r'^edit_host/', views.edit_host),
 
     url(r'^insert/', views.insert),
+
+    url(r'^check_code.html$', views.check_code),
 ]

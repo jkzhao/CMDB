@@ -6,7 +6,43 @@ from asset import models
 
 import json
 from utils import pagination
+from io import BytesIO
+from utils.check_code import create_validate_code
 
+
+def check_code(request):
+    """
+    验证码
+    :param request:
+    :return:
+    """
+    # stream = BytesIO()
+    # img, code = create_validate_code()
+    # img.save(stream, 'PNG')
+    # request.session['CheckCode'] = code
+    # return HttpResponse(stream.getvalue())
+
+    # 打开固定图片
+    # data = open('static/imgs/avatar/20130809170025.png','rb').read()
+    # return HttpResponse(data)
+
+    # 1. 自己创建一张图片 pip3 install Pillow
+    # 2. 在图片中写入随机字符串
+    # obj = object()
+    # 3. 将图片写入到指定文件
+    # 4. 打开指定目录的该文件，读取内容
+    # 5. HttpResponse(data)
+
+    stream = BytesIO()
+    img, code = create_validate_code()
+    # print(img, code)
+    # f = open('xxxxx.png', 'wb')
+    # img.save(f, 'PNG')
+    # f.close()
+    # return HttpResponse(open('xxxxx.png', 'rb').read()) #这是写在文件中，在读出来，不如写在内存中，省写文件的时间了，更快
+    img.save(stream, 'PNG') #'PNG'是生成文件的后缀名
+    request.session['CheckCode'] = code
+    return HttpResponse(stream.getvalue()) #从内存中读出来
 
 def login(request):
     '''登录'''
@@ -14,6 +50,10 @@ def login(request):
     if request.method == "GET":
         return render(request, 'login.html')
     elif request.method == "POST":
+        code = request.POST.get('check_code')
+        if code.upper() != request.session['CheckCode'].upper():
+            error_msg = "验证码错误"
+            return render(request, 'login.html', {'error_msg': error_msg})
         u = request.POST.get('user')
         p = request.POST.get('pwd')
         # obj = models.UserInfo.objects.filter(username=u,password=p).first()
@@ -29,6 +69,8 @@ def login(request):
             if request.POST.get('rememberMe', None) == '1':
                 request.session.set_expiry(604800)
 
+            if "login_from" not in request.session.keys():
+                return redirect('/index/')
             return redirect(request.session['login_from'])
         else:
             error_msg = "密码错误"
