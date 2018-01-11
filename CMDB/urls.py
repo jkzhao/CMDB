@@ -19,6 +19,7 @@ from asset import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^$', views.index, name='index'),
     url(r'^index/', views.index),
     url(r'^login/', views.login),
     url(r'^logout/', views.logout),
