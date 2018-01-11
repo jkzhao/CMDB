@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.shortcuts import HttpResponse
 from django.views import View
 from asset import models
+from asset.models import UrlGroup,UrlInfor
 
 import json
 from utils import pagination
@@ -127,6 +128,7 @@ def host(request):
         #                "e_list": e_list, 'current_user': request.session['username']})
 
         hosts = models.Host.objects.all()
+        print(type(hosts))
         return render(request, 'host.html', {"hosts": hosts, 'current_user': request.session['username']})
     elif request.method == "POST":
         result = {'status': True, 'error': None, 'data': None}
@@ -220,41 +222,38 @@ def is_valid_ipv4_address(address):
     return True
 
 
-def insert(request):
-    '''临时用来插入数据'''
-    # models.EngineRoom.objects.create(name='阿里云')
-    # models.EngineRoom.objects.create(name='金智园区4L')
 
-    # models.Business.objects.create(caption='日志系统',code='logSystem')
-    # models.Business.objects.create(caption='智能问答',code='robot')
+@auth
+def environment(request):
+    """
+    构造数据格式
+        list
+            dict
+                list
+                    dict
 
-    # models.Host.objects.create(ip='172.16.206.16', hostname='hadoop16', b_id=1, e_id=2)
-    models.Host.objects.create(ip='172.16.206.17', hostname='spark17', b_id=1, e_id=2)
-    # models.Host.objects.create(ip='172.16.206.33', hostname='hadoop33', b_id=1, e_id=2)
-    # models.Host.objects.create(ip='172.16.206.31', hostname='spark31', b_id=1, e_id=2)
-    models.Host.objects.create(ip='172.16.206.32', hostname='spark32', b_id=1, e_id=2)
-    models.Host.objects.create(ip='172.16.206.26', hostname='hadoop26', b_id=1, e_id=2)
-    models.Host.objects.create(ip='172.16.206.27', hostname='hadoop27', b_id=1, e_id=2)
-    models.Host.objects.create(ip='172.16.206.28', hostname='hadoop28', b_id=1, e_id=2)
-    models.Host.objects.create(ip='172.16.206.29', hostname='hadoop29', b_id=1, e_id=2)
-    models.Host.objects.create(ip='172.16.206.30', hostname='osb30', b_id=1, e_id=2)
-    # we+ i+
-    models.Host.objects.create(ip='116.62.20.63', hostname='db', b_id=2, e_id=1)
-    models.Host.objects.create(ip='121.196.215.58', hostname='engine', b_id=2, e_id=1)
-    models.Host.objects.create(ip='121.196.203.204', hostname='manager', b_id=2, e_id=1)
-    models.Host.objects.create(ip='114.55.246.158', hostname='console', b_id=2, e_id=1)
-    models.Host.objects.create(ip='114.55.29.86', hostname='log1', b_id=2, e_id=1)
-    models.Host.objects.create(ip='114.55.29.241', hostname='log2', b_id=2, e_id=1)
-    models.Host.objects.create(ip='114.55.253.15', hostname='log3', b_id=2, e_id=1)
-    # njust i+
-    models.Host.objects.create(ip='121.40.113.254', hostname='db', b_id=2, e_id=1)
-    models.Host.objects.create(ip='121.40.105.42', hostname='engine', b_id=2, e_id=1)
-    models.Host.objects.create(ip='121.40.129.155', hostname='manager', b_id=2, e_id=1)
-    models.Host.objects.create(ip='172.16.2.42', hostname='idstest', b_id=1, e_id=2)
-    models.Host.objects.create(ip='172.16.4.81', hostname='vpn', b_id=1, e_id=2)
+    从组里取出所有组，然后再根据一对多的关系，通过组获取url的具体信息，属于反向获取数据
+    [{
+        "code": "utils",
+        "list": [
+            {"desc": "\u7ebf\u4e0aelk\u65e5\u5fd7\u68c0\u7d22\u7cfb\u7edf", "href": "http://192.168.0.210", "title": "\u7ebf\u4e0aelk\u7cfb\u7edf"},
+            {"desc": "\u7ebf\u4e0a\u90ae\u7bb1\u5730\u5740\uff0c\u516c\u53f8\u5185\u90e8\u90ae\u7bb1\u767b\u9646\u94fe\u63a5", "href": "http://192.168.0.215", "title": "\u90ae\u7bb1\u5730\u5740"}
+            ],
+        "title": "\u751f\u4ea7\u73af\u5883"
+    },
+    ...]
+    """
+    _group_lists = UrlGroup.objects.all()
+    _datas = []
+    for group in _group_lists.all():
+        if group.group_set.count() > 0:
+            _group_template = {"title": "{0}".format(group.group_name), "code": "{0}".format(group.code), "list": []}
+            _group = UrlGroup.objects.get(code=group.code)
+            for k in _group.group_set.all():
+                _url_template = {"title": "{0}".format(k.url_name), "href": "{0}".format(k.url_path),
+                                 "desc": "{0}".format(k.url_desc)}
+                _group_template["list"].extend([_url_template])
+            _datas.extend([_group_template])
 
-
-    # models.User.objects.create(username='admin',password='123456',email='01115004@wisedu.com')
-
-    return HttpResponse('OK')
+    return render(request, 'environment.html', {'url_group_info': _datas, 'current_user': request.session['username']})
 

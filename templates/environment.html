@@ -1,0 +1,62 @@
+{% extends 'master.html' %}
+
+{% block title %}业务环境{% endblock %}
+
+{% block content %}
+    <h1 class="page-header" style="font-size: 28px;">业务环境</h1>
+{#bootstrap组件：面板（情景效果）#}
+{#    <div class="panel panel-primary">#}
+{##}
+{#        <div class="panel-heading">4L机房环境</div>#}
+{#        <ul class="list-group">#}
+{#            <li class="list-group-item"><a href="http://172.16.206.30:8080/jenkins" target="_blank">Jenkins</a></li>#}
+{#            <li class="list-group-item">Jira</li>#}
+{#            <li class="list-group-item">Confluence</li>#}
+{#            <li class="list-group-item">私服</li>#}
+{#        </ul>#}
+{##}
+{#    </div>#}
+
+    {% load get_item %}
+    {% if url_group_info %}
+        {% for item in url_group_info %}
+            <div class="panel panel-primary">
+                <div class="panel-heading">{{ item|get_item:'title' }}</div>
+                <ul class="list-group">
+                    {% for key,value in item.items %}
+                        {% ifequal key 'list' %}
+                            {% for url_info in value %}
+                                <li class="list-group-item"><a href={{ url_info|get_item:'href' }} target="_blank">{{ url_info|get_item:'title' }}</a></li>
+                            {% endfor %}
+                        {% endifequal %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+
+    {% endif %}
+
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(document).ready(function(){
+            $('.pg-content,.item,#business').removeClass('hide');
+        });
+
+    </script>
+{% endblock %}
+
+
+{% block css %}
+    <style>
+
+    </style>
+{% endblock %}
+
+
+
+
+

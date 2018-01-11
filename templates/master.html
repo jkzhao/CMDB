@@ -11,6 +11,7 @@
 
     <title>{% block title %} {% endblock %}</title>
 
+    <link rel="icon" href="/static/img/favicon.ico" sizes="16x16">
     <!-- Bootstrap core CSS -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
 {#    <link href="/static/css/datatable.css" rel="stylesheet">#}
@@ -153,6 +154,10 @@
                     <li class="item">
                         <a href="#" onclick="ChangeMenu(this);">业务资源管理</a>
                         <div id="business" class="hide">
+                            <a class="resource" href="/environment">
+                                <span class="glyphicon glyphicon-globe" aria-hidden="true"
+                                      style="color: #D28EF9;"></span>&nbsp;&nbsp;业务环境
+                            </a>
                             <a class="resource" href="/software">
                                 <span class="glyphicon glyphicon-folder-close" aria-hidden="true"
                                       style="color: #D28EFF;"></span>&nbsp;&nbsp;软件管理
