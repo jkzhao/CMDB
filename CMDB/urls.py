@@ -28,6 +28,10 @@ urlpatterns = [
     url(r'^delete_host/', views.delete_host),
     url(r'^edit_host/', views.edit_host),
 
+    url(r'^software/', views.software),
+    url(r'^business/', views.business),
+    url(r'^user/', views.user),
+
     url(r'^check_code.html$', views.check_code),
 
     url(r'^environment/', views.environment),

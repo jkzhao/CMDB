@@ -128,7 +128,6 @@ def host(request):
         #                "e_list": e_list, 'current_user': request.session['username']})
 
         hosts = models.Host.objects.all()
-        print(type(hosts))
         return render(request, 'host.html', {"hosts": hosts, 'current_user': request.session['username']})
     elif request.method == "POST":
         result = {'status': True, 'error': None, 'data': None}
@@ -257,3 +256,20 @@ def environment(request):
 
     return render(request, 'environment.html', {'url_group_info': _datas, 'current_user': request.session['username']})
 
+def software(request):
+    """
+    todo
+    """
+    return HttpResponse("开发中。。。")
+
+def business(request):
+    """
+    todo
+    """
+    return HttpResponse("开发中。。。")
+
+def user(request):
+    """
+    todo
+    """
+    return HttpResponse("开发中。。。")
