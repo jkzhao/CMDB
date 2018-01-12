@@ -134,13 +134,13 @@ STATICFILES_DIRS = (
 
 # Session
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'   # 引擎（默认）
-#SESSION_COOKIE_NAME ＝ 'sessionid'                       # Session的cookie保存在浏览器上时的key，即：sessionid＝随机字符串（默认）
+#SESSION_COOKIE_NAME＝'sessionid'                       # Session的cookie保存在浏览器上时的key，即：sessionid＝随机字符串（默认）
 #SESSION_COOKIE_PATH ＝ '/'                               # Session的cookie保存的路径（默认）
 SESSION_COOKIE_DOMAIN = None                             # Session的cookie保存的域名（默认）
 SESSION_COOKIE_SECURE = False                            # 是否Https传输cookie（默认）
 SESSION_COOKIE_HTTPONLY = True                           # 是否Session的cookie只支持http传输（默认）
 SESSION_COOKIE_AGE = 7200                               # Session的cookie失效日期（默认2周，这里我设置两小时）
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False                  # 是否关闭浏览器使得Session过期（默认）
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True                  # 是否关闭浏览器使得Session过期（默认）
 SESSION_SAVE_EVERY_REQUEST = True                       # 是否每次请求都保存Session，默认修改之后才保存（默认）
 
 
