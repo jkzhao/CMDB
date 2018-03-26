@@ -9,6 +9,7 @@ import json
 from utils import pagination
 from io import BytesIO
 from utils.check_code import create_validate_code
+from hashlib import sha1
 
 
 def check_code(request):
@@ -64,7 +65,10 @@ def login(request):
         if not obj:
             error_msg = "用户名不存在"
             return render(request, 'login.html', {'error_msg': error_msg})
-        if obj.password == p:
+        passwd_sha1 = sha1()
+        passwd_sha1.update(p.encode("utf-8"))
+        user_passwd_sha1 = passwd_sha1.hexdigest()
+        if obj.password == user_passwd_sha1:
             request.session['username'] = u
             request.session['is_login'] = True
             if request.POST.get('rememberMe', None) == '1':
@@ -254,6 +258,7 @@ def environment(request):
                 _group_template["list"].extend([_url_template])
             _datas.extend([_group_template])
 
+    # return HttpResponse(json.dumps(_datas))
     return render(request, 'environment.html', {'url_group_info': _datas, 'current_user': request.session['username']})
 
 def software(request):
