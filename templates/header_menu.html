@@ -1,0 +1,39 @@
+
+    <!--导航栏-->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Wisedu</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#">通知<i class="fa fa-envelope-o" aria-hidden="true"></i>&nbsp;<span class="badge bg-success">5</span></a>
+                    </li>
+                    <li>
+                        <a href="#">任务<i class="fa fa-bell-o" aria-hidden="true"></i> <span class="badge bg-danger">3</span></a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false" style="padding-top: 0;padding-bottom: 0;">
+                            <img src="/static/img/1111.jpg" class="img-circle" style="width: 40px;height: 40px;margin-top: 5px;" />&nbsp;
+                            <span style="color: white;">{{ current_user }}</span> <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> 我的资料</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="/logout/"><span class="glyphicon glyphicon-off" aria-hidden="true"></span> 注销</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+

@@ -1,4 +1,4 @@
-{% extends 'master.html' %}
+{% extends '_layout.html' %}
 
 {% block title %}主机管理{% endblock %}
 
@@ -7,7 +7,7 @@
     {% include 'operation.html' %}
     {% if hosts %}
     <div style="margin-top: 10px;">
-        <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+        <table class="table table-striped table-bordered" id="dataTables-example" style="width:100%">
             <thead>
                 <tr>
                     <th>选择</th>
@@ -32,8 +32,11 @@
                         <td>{{ row.b.caption }}</td>    <!--forloop.first,是否是第一个--> <!--forloop.last,是否是最后一个-->
                         <td>{{ row.e.name }}</td>
                         <td style="text-align:center;">                           <!--forloop.parentloop,外层循环-->
+                            <a class="edit-single-host" href="#">
+                                <span class="fa fa-search" aria-hidden="true">查看详细</span>
+                            </a> |
                             <a class="edit-single-host">
-                                <span class="glyphicon glyphicon-edit" aria-hidden="true" data-toggle="modal" data-target="#editModal"></span>
+                                <span class="glyphicon glyphicon-edit" aria-hidden="true" data-toggle="modal" data-target="#editModal">编辑</span>
                             </a>
                         </td>
                         <td style="text-align:center;">
@@ -47,23 +50,6 @@
         </table>
     </div>
     {% endif %}
-
-{#    <div>#}
-{#        <div style="display: inline;float: left;margin-top: 10px;">#}
-{#            共 {{ data_length }} 条数据，每页显示#}
-{#            <select id="ps" onchange="changePageSize(this)"> <!--让用户选择每页显示多少数据-->#}
-{#                <option value="10">10</option>#}
-{#                <option value="30">30</option>#}
-{#                <option value="50">50</option>#}
-{#                <option value="100">100</option>#}
-{#            </select>#}
-{#            条#}
-{#        </div>#}
-{#        <!--页码-->#}
-{#        <div class="pagination" style="display: inline;float: right;margin-top: 5px;">#}
-{#            {{ page_str }}#}
-{#        </div>#}
-{#    </div>#}
 
 
     <!--Bootstrap add modal-->
@@ -203,6 +189,7 @@
 
         $(document).ready(function(){
             $('.pg-content,.item,#host').removeClass('hide');
+            $('#dataTables-example').DataTable();
         });
 
         function checkAll() {
@@ -320,54 +307,6 @@
             })
         })
 
-{#        $(function(){ //客户端也是可以设置Cookies，不只是服务器端可以设置Cookies#}
-{#            if(! $.cookie('per_page_count')) {#}
-{#                $.cookie('per_page_count', 10);#}
-{#            }#}
-{#            var v = $.cookie('per_page_count'); //页面框架加载完成后，先找到cookies中的值#}
-{#            $('#ps').val(v); //然后checkbox里面的值设置为Cookies中获取到的值#}
-{#        });#}
-{#        function changePageSize(ths){#}
-{#            var v = $(ths).val(); //用户当前checkbox选择的value#}
-{#            //$.cookie('per_page_count',v, {path: "/host/"}); //原来jquery里面没有$.cookie#}
-{#            $.cookie('per_page_count',v); //这和服务端设置cookie path不一样，在默认情况下，只有设置cookie的网页才能读取该cookie，如果想让一个页面读取另一个页面设置的cookie，必须设置cookie的路径，cookies的路径用于设置能够读取cookie的顶级目录，将这个路径设置为网站的根目 录，可以让所有网页都能互相读取cookie（一般不要这样设置，防止出现冲突）#}
-{#                                //为什么加{'path': "/user_list/"}，因为如果你有其他的项目表格选择，比如主机列表在其他url，那个url不一定想要一页显示30条，所以要设置只对当前url生效#}
-{#            location.reload(); //选择完刷新页面#}
-{#        }#}
-
-        $(function() {
-            var oLanguage = {
-                "oAria": {
-                    "sSortAscending": ": 升序排列",
-                    "sSortDescending": ": 降序排列"
-                },
-                "oPaginate": {
-                    "sFirst": "首页",
-                    "sLast": "末页",
-                    "sNext": "下页",
-                    "sPrevious": "上页"
-                },
-                "sEmptyTable": "没有相关记录",
-                "sInfo": "第 _START_ 到 _END_ 条记录，共 _TOTAL_ 条",
-                "sInfoEmpty": "第 0 到 0 条记录，共 0 条",
-                "sInfoFiltered": "(从 _MAX_ 条记录中检索)",
-                "sInfoPostFix": "",
-                "sDecimal": "",
-                "sThousands": ",",
-                "sLengthMenu": "每页显示条数: _MENU_",
-                "sLoadingRecords": "正在载入...",
-                "sProcessing": "正在载入...",
-                "sSearch": "搜索:",
-                "sSearchPlaceholder": "",
-                "sUrl": "",
-                "sZeroRecords": "没有相关记录"
-            }
-            $.fn.dataTable.defaults.oLanguage = oLanguage;
-            $('#dataTables-example').DataTable({
-                responsive: true,
-                // iDisplayLength:3
-            });
-        });
     </script>
 {% endblock %}
 

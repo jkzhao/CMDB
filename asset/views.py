@@ -6,9 +6,9 @@ from asset import models
 from asset.models import UrlGroup,UrlInfor
 
 import json
-from utils import pagination
 from io import BytesIO
 from utils.check_code import create_validate_code
+from utils.time_calculate import cal_time
 from hashlib import sha1
 
 
@@ -18,33 +18,17 @@ def check_code(request):
     :param request:
     :return:
     """
-    # stream = BytesIO()
-    # img, code = create_validate_code()
-    # img.save(stream, 'PNG')
-    # request.session['CheckCode'] = code
-    # return HttpResponse(stream.getvalue())
-
-    # 打开固定图片
-    # data = open('static/imgs/avatar/20130809170025.png','rb').read()
-    # return HttpResponse(data)
-
-    # 1. 自己创建一张图片 pip3 install Pillow
-    # 2. 在图片中写入随机字符串
-    # obj = object()
-    # 3. 将图片写入到指定文件
-    # 4. 打开指定目录的该文件，读取内容
-    # 5. HttpResponse(data)
-
     stream = BytesIO()
     img, code = create_validate_code()
-    # print(img, code)
-    # f = open('xxxxx.png', 'wb')
-    # img.save(f, 'PNG')
-    # f.close()
-    # return HttpResponse(open('xxxxx.png', 'rb').read()) #这是写在文件中，在读出来，不如写在内存中，省写文件的时间了，更快
     img.save(stream, 'PNG') #'PNG'是生成文件的后缀名
     request.session['CheckCode'] = code
+
     return HttpResponse(stream.getvalue()) #从内存中读出来
+
+def logout(request):
+    '''注销'''
+    request.session.clear()
+    return redirect('/login/')
 
 def login(request):
     '''登录'''
@@ -93,10 +77,6 @@ def auth(func):
         return func(request, *args, **kwargs)
     return inner
 
-def logout(request):
-    '''注销'''
-    request.session.clear()
-    return redirect('/login/')
 
 '''
 主页
@@ -104,7 +84,7 @@ def logout(request):
 @auth
 def index(request):
     '''主页'''
-    return HttpResponse("ni hao...")
+    return render(request, 'index.html')
 
 '''
 主机管理
@@ -131,8 +111,11 @@ def host(request):
         #               {"hosts": data, "data_length": data_length, "page_str": page_str, "b_list": b_list,
         #                "e_list": e_list, 'current_user': request.session['username']})
 
+        b_list = models.Business.objects.all()  # 拿到业务线
+        e_list = models.EngineRoom.objects.all()  # 拿到机房
+
         hosts = models.Host.objects.all()
-        return render(request, 'host.html', {"hosts": hosts, 'current_user': request.session['username']})
+        return render(request, 'host.html', {"hosts": hosts, 'b_list': b_list,'e_list': e_list, 'current_user': request.session['username']})
     elif request.method == "POST":
         result = {'status': True, 'error': None, 'data': None}
         try:  # 因为这里面的代码有可能出错

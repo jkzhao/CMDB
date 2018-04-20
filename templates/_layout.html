@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- <link rel="icon" href="img/favicon.ico"> -->
+
+    <title>{% block title %} {% endblock %}</title>
+
+    <link rel="icon" href="/static/img/favicon.ico" sizes="16x16">
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- font style-->
+    <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.css"/>
+
+    <link rel="stylesheet" href="/static/css/dataTables.bootstrap.min.css">
+
+    <!-- Custom styles for this template -->
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+
+    <style type="text/css">
+        .hide {
+            display: none;
+        }
+
+        .sidebar-header {
+            position: fixed;
+            top: 50px;
+            width: 180px;
+            padding: 17px 25px;
+            border-bottom: 1px solid #e1e1e1;
+            font-size: 18px;
+            line-height: 25px;
+            color: #167be0;
+            z-index: 3;
+        }
+
+        .item .resource {
+            display: block;
+            height: 35px;
+            background-color: #dddddd;
+            color: #000;
+            line-height: 35px;
+            padding-left: 35px;
+            text-decoration: none; /*去掉a标签的下划线*/
+        }
+
+    </style>
+    {% block css %} {% endblock %}
+
+</head>
+
+<body>
+    {% include 'header_menu.html' %}
+
+    <!--左侧菜单和正文-->
+    <div class="container-fluid">
+        <div class="row">
+            <!--左侧菜单-->
+            <div class="col-sm-3 col-md-2 sidebar">
+                <div class="sidebar-header">CMDB</div>
+                <ul class="nav nav-sidebar" style="margin-top: 50px;">
+                    <!-- <li class="active"><a href="#">CMDB <span class="sr-only">(current)</span></a></li> -->
+                    <li class="item">
+                        <a href="#" onclick="ChangeMenu(this);"><i class="fa fa-connectdevelop" aria-hidden="true"></i> 基础资源管理</a>
+                        <div id="host" class="hide">
+                            <a class="resource" href="/host">
+                                <span class="glyphicon glyphicon-hdd" aria-hidden="true" style="color: orange;"></span>&nbsp;&nbsp;主机管理
+                            </a>
+                        </div>
+                    </li>
+                    <li class="item">
+                        <a href="#" onclick="ChangeMenu(this);"><i class="fa fa-free-code-camp" aria-hidden="true"></i> 业务资源管理</a>
+                        <div id="business" class="hide">
+                            <a class="resource" href="/environment">
+                                <span class="glyphicon glyphicon-globe" aria-hidden="true"
+                                      style="color: #D28EF9;"></span>&nbsp;&nbsp;业务环境
+                            </a>
+                            <a class="resource" href="/software">
+                                <span class="glyphicon glyphicon-folder-close" aria-hidden="true"
+                                      style="color: #D28EFF;"></span>&nbsp;&nbsp;软件管理
+                            </a>
+                            <a class="resource" href="/business">
+                                <span class="glyphicon glyphicon-briefcase" aria-hidden="true"
+                                      style="color: #CCFF99;"></span>&nbsp;&nbsp;业务线管理
+                            </a>
+                        </div>
+                    </li>
+                    <li class="item">
+                        <a href="#" onclick="ChangeMenu(this);"><i class="fa fa-cogs" aria-hidden="true"></i> 组织信息管理</a>
+                        <div id="user" class="hide">
+                            <a class="resource" href="/user">
+                                <span class="glyphicon glyphicon-user" aria-hidden="true" style="color: #337ab7;"></span>&nbsp;&nbsp;用户管理
+                            </a>
+                        </div>
+                    </li>
+
+                    <li><a href=""><i class="fa fa-cloud-upload" aria-hidden="true"></i> IDC管理</a></li>
+                    <li><a href=""><i class="fa fa-cubes" aria-hidden="true"></i> 标签管理</a></li>
+                    <li><a href=""><i class="fa fa-desktop" aria-hidden="true"></i> 日志管理</a></li>
+                </ul>
+            </div>
+
+            <!--正文-->
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                {% block content %} {% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="/static/js/jquery-1.12.4.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.dataTables.min.js"></script>
+    <script src="/static/js/dataTables.bootstrap.min.js"></script>
+
+    <script>
+        //点击左侧菜单展开子项
+        function ChangeMenu(ths) {
+            var current_header = ths;
+
+            //当前标签添加样式或删除样式，点一下展开，再点一下，隐藏起来
+            if (current_header.nextElementSibling.classList.contains('hide')) {
+                current_header.nextElementSibling.classList.remove('hide');
+            }
+            else {
+                current_header.nextElementSibling.classList.add('hide');
+            }
+
+        }
+    </script>
+    {% block js %} {% endblock %}
+
+</body>
+</html>
