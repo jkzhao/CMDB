@@ -261,3 +261,11 @@ def user(request):
     todo
     """
     return HttpResponse("开发中。。。")
+
+class AssetDetailView(View):
+    def get(self, request, device_type_id, asset_nid):
+        print("ccccc")
+        #response = asset.Asset.assets_detail(device_type_id, asset_nid)
+        #return render(request, 'asset_detail.html', {'response': response, 'device_type_id': device_type_id})
+        return render(request, 'asset_detail.html')
+

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'asset',
+    'repository',
 ]
 
 MIDDLEWARE = [
@@ -79,12 +80,20 @@ DATABASES = {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     # }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'cmdb', #数据库名，这个数据库django是不能创建的，得你自己在数据库里创建
+    #     'USER': 'root',
+    #     'PASSWORD': 'wisedu123',
+    #     'HOST': '116.62.20.63',
+    #     'PORT': '3306',
+    # }
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'cmdb', #数据库名，这个数据库django是不能创建的，得你自己在数据库里创建
         'USER': 'root',
         'PASSWORD': 'wisedu123',
-        'HOST': '116.62.20.63',
+        'HOST': '116.62.124.150',
         'PORT': '3306',
     }
 }

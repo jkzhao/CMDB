@@ -35,4 +35,7 @@ urlpatterns = [
     url(r'^check_code.html$', views.check_code),
 
     url(r'^environment/', views.environment),
+
+    url(r'^asset_detail.html/', views.AssetDetailView.as_view()),
+
 ]
