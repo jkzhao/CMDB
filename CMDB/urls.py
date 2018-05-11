@@ -16,23 +16,11 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from asset import views
+from django.conf.urls import include
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^$', views.index, name='index'),
-    url(r'^index/', views.index),
-    url(r'^login/', views.login),
-    url(r'^logout/', views.logout),
+    url(r'^api/', include('api.urls')),
+    url(r'', include('asset.urls')),
 
-    url(r'^host/', views.host),
-    url(r'^delete_host/', views.delete_host),
-    url(r'^edit_host/', views.edit_host),
-
-    url(r'^software/', views.software),
-    url(r'^business/', views.business),
-    url(r'^user/', views.user),
-
-    url(r'^check_code.html$', views.check_code),
-
-    url(r'^environment/', views.environment),
 ]

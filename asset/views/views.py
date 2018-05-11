@@ -1,122 +1,29 @@
-from django.shortcuts import render
-from django.shortcuts import redirect
-from django.shortcuts import HttpResponse
+from django.shortcuts import render,redirect,HttpResponse
 from django.views import View
-from asset import models
-from asset.models import UrlGroup,UrlInfor
+from repository import models
+from repository.models import UrlGroup,UrlInfor
+from .account import auth
 
 import json
-from io import BytesIO
-from utils.check_code import create_validate_code
-from utils.time_calculate import cal_time
-from hashlib import sha1
-
-
-def check_code(request):
-    """
-    验证码
-    :param request:
-    :return:
-    """
-    stream = BytesIO()
-    img, code = create_validate_code()
-    img.save(stream, 'PNG') #'PNG'是生成文件的后缀名
-    request.session['CheckCode'] = code
-
-    return HttpResponse(stream.getvalue()) #从内存中读出来
-
-def logout(request):
-    '''注销'''
-    request.session.clear()
-    return redirect('/login/')
-
-def login(request):
-    '''登录'''
-    error_msg = ""
-    if request.method == "GET":
-        return render(request, 'login.html')
-    elif request.method == "POST":
-        code = request.POST.get('check_code')
-        if code.upper() != request.session['CheckCode'].upper():
-            error_msg = "验证码错误"
-            return render(request, 'login.html', {'error_msg': error_msg})
-        u = request.POST.get('user')
-        p = request.POST.get('pwd')
-        # obj = models.UserInfo.objects.filter(username=u,password=p).first()
-        # print(obj)# obj None,
-        # count = models.UserInfo.objects.filter(username=u, password=p).count()
-        obj = models.User.objects.filter(username=u).first()
-        if not obj:
-            error_msg = "用户名不存在"
-            return render(request, 'login.html', {'error_msg': error_msg})
-        passwd_sha1 = sha1()
-        passwd_sha1.update(p.encode("utf-8"))
-        user_passwd_sha1 = passwd_sha1.hexdigest()
-        if obj.password == user_passwd_sha1:
-            request.session['username'] = u
-            request.session['is_login'] = True
-            if request.POST.get('rememberMe', None) == '1':
-                request.session.set_expiry(604800)
-
-            if "login_from" not in request.session.keys():
-                return redirect('/index/')
-            return redirect(request.session['login_from'])
-        else:
-            error_msg = "密码错误"
-            return render(request, 'login.html', {'error_msg': error_msg})
-
-def auth(func):
-    '''FBV装饰器实现认证，防止多个url需要认证'''
-    def inner(request, *args, **kwargs):
-        if not request.session.get('username', None):
-            # 记住来源的url，如果没有则设置为首页('/')
-            # request.session['login_from'] = request.META.get('HTTP_REFERER', '/index/')
-            request.session['login_from'] = request.path
-            print(request.session['login_from'])
-            return redirect('/login/')
-        return func(request, *args, **kwargs)
-    return inner
-
+from django.utils.decorators import method_decorator
+from asset.service import asset
+from django.http import JsonResponse
 
 '''
-主页
+资产管理
 '''
-@auth
-def index(request):
-    '''主页'''
-    return render(request, 'index.html')
+@method_decorator(auth,name='dispatch')
+class AssetView(View):
+    def get(self, request, *args, **kwargs):
+        obj = asset.Asset()
+        response = obj.fetch_assets(request)
+        print(response.__dict__)
+        #print(response.data)
+        #print(JsonResponse(response.__dict__))
+        return render(request, 'asset.html', {"response": response, 'current_user': request.session['username']})
+        #return render(request, 'asset.html', {"assets": respone.data, 'current_user': request.session['username']})
 
-'''
-主机管理
-'''
-@auth
-def host(request):
-    '''主机展示表和添加主机'''
-    # HOSTS = models.Host.objects.all()  # 全局变量
-    if request.method == "GET":
-        # current_page = request.GET.get('p', 1)  # 如果p不存在，看第1页。每一页显示10个数据 [0-10],[10-20],[20-30]
-        # current_page = int(current_page)  # GET获取到的都是字符串
-        #
-        # val = request.COOKIES.get('per_page_count', 10)  # 从Cookies中拿到当前用户要求一页显示多少数据，默认是10
-        # val = int(val)
-        # page_obj = pagination.Page(current_page, len(HOSTS), val)
-        #
-        # data = HOSTS[page_obj.start:page_obj.end]  # 取数据
-        # data_length = len(data)
-        # page_str = page_obj.page_str("/host/")
-        #
-        # b_list = models.Business.objects.all()  # 拿到业务线
-        # e_list = models.EngineRoom.objects.all()  # 拿到机房
-        # return render(request, "host.html",
-        #               {"hosts": data, "data_length": data_length, "page_str": page_str, "b_list": b_list,
-        #                "e_list": e_list, 'current_user': request.session['username']})
-
-        b_list = models.Business.objects.all()  # 拿到业务线
-        e_list = models.EngineRoom.objects.all()  # 拿到机房
-
-        hosts = models.Host.objects.all()
-        return render(request, 'host.html', {"hosts": hosts, 'b_list': b_list,'e_list': e_list, 'current_user': request.session['username']})
-    elif request.method == "POST":
+    def post(self, request, *args, **kwargs):
         result = {'status': True, 'error': None, 'data': None}
         try:  # 因为这里面的代码有可能出错
             h = request.POST.get('hostname')
@@ -148,6 +55,7 @@ def host(request):
         # 其实也是能用render()，一般要渲染一些东西返回给用户，但是前端拿到html，没有办法JSON.parse()，必须形似字典才行。
         # 但是不能用redirect()
 
+
 def delete_host(request):
     '''删除单个主机记录和批量删除主机记录'''
     hid = request.POST.get('hid')
@@ -155,7 +63,7 @@ def delete_host(request):
     hid_list = hid.split(",")
     for hid in hid_list:
         #print(hid,type(hid))
-        models.Host.objects.filter(id=hid).first().delete()
+        models.Asset.objects.filter(id=hid).first().delete()
 
     return redirect('/host')
 
@@ -261,3 +169,12 @@ def user(request):
     todo
     """
     return HttpResponse("开发中。。。")
+
+class AssetDetailView(View):
+    def get(self, request, device_type_id, asset_nid):
+        print("device_type_id", device_type_id)
+        print("asset_nid", asset_nid)
+        response = asset.Asset.assets_detail(device_type_id, asset_nid)
+
+        return render(request, 'asset_detail.html', {'response': response, 'device_type_id': device_type_id})
+

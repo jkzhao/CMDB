@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'asset',
+    'repository',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -79,12 +81,20 @@ DATABASES = {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     # }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'cmdb', #数据库名，这个数据库django是不能创建的，得你自己在数据库里创建
+    #     'USER': 'root',
+    #     'PASSWORD': 'wisedu123',
+    #     'HOST': '116.62.20.63',
+    #     'PORT': '3306',
+    # }
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'cmdb', #数据库名，这个数据库django是不能创建的，得你自己在数据库里创建
         'USER': 'root',
         'PASSWORD': 'wisedu123',
-        'HOST': '116.62.20.63',
+        'HOST': '116.62.124.150',
         'PORT': '3306',
     }
 }
@@ -143,4 +153,7 @@ SESSION_COOKIE_AGE = 7200                               # Session的cookie失效
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True                  # 是否关闭浏览器使得Session过期（默认）
 SESSION_SAVE_EVERY_REQUEST = True                       # 是否每次请求都保存Session，默认修改之后才保存（默认）
 
-
+# API authentication
+ASSET_AUTH_KEY = '299095cc-1330-11e5-b06a-a45e60bec08b'
+ASSET_AUTH_HEADER_NAME = 'HTTP_AUTH-KEY' #AUTH和KEY之间一定不能用下划线，用-。http请求头不能用下划线，从request中获取到的是HTTP_AUTH_KEY
+ASSET_AUTH_TIME = 2  # 2s内
