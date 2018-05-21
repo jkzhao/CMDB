@@ -14,7 +14,8 @@ ENCRYPT_LIST = [
 
 
 def api_auth_method(request):
-    auth_key = request.META.get('HTTP_AUTHKEY')
+    auth_key = request.META.get('HTTP_AUTH_KEY')
+    # print(auth_key)
     if not auth_key:
         return False
     sp = auth_key.split('|')

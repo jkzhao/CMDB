@@ -76,3 +76,10 @@ class LogoutView(View):
         '''注销'''
         request.session.clear()
         return redirect('/login.html')
+
+if __name__ == '__main__':
+    p = '123456'
+    passwd_sha1 = sha1()
+    passwd_sha1.update(p.encode("utf-8"))
+    user_passwd_sha1 = passwd_sha1.hexdigest()
+    print(user_passwd_sha1)

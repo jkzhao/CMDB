@@ -4,16 +4,17 @@ from django.db import models
 from django.db import models
 
 
+from django.db import models
+
+
 class UserProfile(models.Model):
     """
     用户信息表：存着很多用户，如果只有两个人可以登录，就只给这两个人设置用户名密码，见下面那张表
     """
-    name = models.CharField(u'姓名', max_length=32)
-    email = models.EmailField(u'邮箱')
-    phone = models.CharField(u'座机', max_length=32, null=True, blank=True) # 在使用Django设计数据库表时，
-                            #如果设置null=True，则仅表示在数据库中该字段可以为空，但使用后台管理添加数据时仍然要需要输入值，因为Django自动做了数据验证不允许字段为空
-                           #如果想要在Django中也可以将字段保存为空值，则需要添加另一个参数：blank=True
-    mobile = models.CharField(u'手机', max_length=32)
+    name = models.CharField('姓名', max_length=32)
+    email = models.EmailField('邮箱')
+    phone = models.CharField('座机', max_length=32, blank=True)
+    mobile = models.CharField('手机', max_length=32)
 
     class Meta:
         verbose_name_plural = "用户表"
@@ -28,8 +29,8 @@ class AdminInfo(models.Model):
     """
     user_info = models.OneToOneField("UserProfile")
 
-    username = models.CharField(u'用户名', max_length=64)
-    password = models.CharField(u'密码', max_length=64)
+    username = models.CharField('用户名', max_length=64)
+    password = models.CharField('密码', max_length=64)
 
     class Meta:
         verbose_name_plural = "管理员表"
@@ -144,7 +145,6 @@ class Server(models.Model):
     服务器信息
     """
     asset = models.OneToOneField('Asset') #对应Asset表中的id列，Asset表保存的是资产共有属性，比如在哪个机房，在哪个机柜，属于哪个业务线
-                                        ##等效于asset = models.Foreign('Asset', unique=True)
 
     hostname = models.CharField(max_length=128, unique=True)
     # 下面3个是主板的信息
@@ -158,7 +158,7 @@ class Server(models.Model):
 
     # 装的系统信息
     os_platform = models.CharField('系统', max_length=16, null=True, blank=True)
-    os_version = models.CharField('系统版本', max_length=16, null=True, blank=True)
+    os_version = models.CharField('系统版本', max_length=64, null=True, blank=True)
 
     #cpu信息
     cpu_count = models.IntegerField('CPU个数', null=True, blank=True)
@@ -198,8 +198,8 @@ class Disk(models.Model):
     """
     slot = models.CharField('插槽位', max_length=8)
     model = models.CharField('磁盘型号', max_length=32)
-    capacity = models.FloatField('磁盘容量GB')
-    pd_type = models.CharField('磁盘类型', max_length=32)
+    capacity = models.CharField('磁盘容量GB', max_length=32)
+    pd_type = models.CharField('磁盘类型', max_length=64)
     server_obj = models.ForeignKey('Server',related_name='disk')
 
     class Meta:
@@ -256,7 +256,7 @@ class AssetRecord(models.Model):
     asset_obj = models.ForeignKey('Asset', related_name='ar')
     content = models.TextField(null=True)
     creator = models.ForeignKey('UserProfile', null=True, blank=True)
-    create_at = models.DateTimeField(auto_now_add=True)
+    create_at = models.DateTimeField(auto_now_add=True)  #使用的是UTC时间，北京时区是东八区，领先UTC八个小时，在电子邮件信头的Date域记为+0800
 
     class Meta:
         verbose_name_plural = "资产记录表"

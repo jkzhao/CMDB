@@ -17,9 +17,9 @@ class AssetView(View):
     def get(self, request, *args, **kwargs):
         obj = asset.Asset()
         response = obj.fetch_assets(request)
-        print(response.__dict__)
-        #print(response.data)
-        #print(JsonResponse(response.__dict__))
+        # print(response.__dict__)
+        # print(response.data)
+        # print(JsonResponse(response.__dict__))
         return render(request, 'asset.html', {"response": response, 'current_user': request.session['username']})
         #return render(request, 'asset.html', {"assets": respone.data, 'current_user': request.session['username']})
 
@@ -172,8 +172,8 @@ def user(request):
 
 class AssetDetailView(View):
     def get(self, request, device_type_id, asset_nid):
-        print("device_type_id", device_type_id)
-        print("asset_nid", asset_nid)
+        # print("device_type_id", device_type_id)
+        # print("asset_nid", asset_nid)
         response = asset.Asset.assets_detail(device_type_id, asset_nid)
 
         return render(request, 'asset_detail.html', {'response': response, 'device_type_id': device_type_id})

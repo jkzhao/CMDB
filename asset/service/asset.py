@@ -41,9 +41,8 @@ class Asset(object):
         try:
             ret = {}
             asset_list = models.Asset.objects.all().extra(select=self.extra_select).values()
-            print("asset_list: %s" % asset_list)
+            # print("asset_list: %s" % asset_list)
             for ast in asset_list:
-                print(type(ast))
                 for device_status in self.device_status_list:
                     if ast.get('device_status_id') == device_status.get('id'):
                         ast['device_status'] = device_status.get('name')
@@ -122,7 +121,7 @@ class Asset(object):
             if device_type_id == '1':
                 response.data = models.Server.objects.filter(asset_id=asset_id).select_related('asset').first() #表之间进行join连表操作，一次性获取关联的数据
                                                                                                             #model.tb.objects.all().select_related('外键字段')
-                print(response.data)
+                # print(response.data)
             else:
                 response.data = models.NetworkDevice.objects.filter(asset_id=asset_id).select_related('asset').first()
 
