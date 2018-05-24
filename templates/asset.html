@@ -27,38 +27,6 @@
                 </tr>
             </thead>
             <tbody id="tb">
-{#                {% load get_item %}#}
-{#                {% for row in assets %}#}
-{#                    <tr hid="{{ row.id }}" bid="{{ row.b_id }}" eid="{{ row.e_id }}"> <!--自定义属性，用户在页面上也看不到这两个值，主机id、业务线id、机房id-->#}
-{#                        <td style="text-align: center">#}
-{#                            <input type="checkbox" />#}
-{#                        </td>#}
-{#                        <td>{{ forloop.counter }}</td> <!--forloop.counter0,计数从0开始，没循环一次，+1-->#}
-{#                        <td>{{ row|get_item:'id' }}</td>#}
-{#                        <td>{{ row|get_item:'device_type' }}</td>#}
-{#                        <td>{{ row|get_item:'server_title' }}</td>    <!--forloop.revcounter,倒序排-->#}
-{#                        <td>{{ row|get_item:'network_title' }}</td>           <!--forloop.revcounter0,倒序排，最下面是0-->#}
-{#                        <td>{{ row|get_item:'idc' }}</td>    <!--forloop.first,是否是第一个--> <!--forloop.last,是否是最后一个-->#}
-{#                        <td>{{ row|get_item:'cabinet_num' }}</td>#}
-{#                        <td>{{ row|get_item:'cabinet_order' }}</td>#}
-{#                        <td>{{ row|get_item:'business_unit' }}</td>#}
-{#                        <td>{{ row|get_item:'device_status' }}</td>#}
-{#                        <td style="text-align:center;">                           <!--forloop.parentloop,外层循环-->#}
-{#                            <a class="edit-single-host" href="/asset-{{ row|get_item:'device_type_id' }}-{{ row|get_item:'id' }}.html">#}
-{#                                <span class="fa fa-search" aria-hidden="true">查看详细</span>#}
-{#                            </a> |#}
-{#                            <a class="edit-single-host">#}
-{#                                <span class="glyphicon glyphicon-edit" aria-hidden="true" data-toggle="modal" data-target="#editModal">编辑</span>#}
-{#                            </a>#}
-{#                        </td>#}
-{#                        <td style="text-align:center;">#}
-{#                            <a class="delete—single-host">#}
-{#                                <span class="glyphicon glyphicon-trash" aria-hidden="true" data-toggle="modal" data-target="#delSignalModal"></span>#}
-{#                            </a>#}
-{#                        </td>#}
-{#                    </tr>#}
-{#                {% endfor %}#}
-
 
                 {% for row in response.data.data_list %}
                     <tr hid="{{ row.id }}" bid="{{ row.business_unit_id }}" eid="{{ row.idc_id }}"> <!--自定义属性，用户在页面上也看不到这两个值，主机id、业务线id、机房id-->
@@ -76,7 +44,7 @@
                         <td>{{ row.business_unit }}</td>
                         <td>{{ row.device_status }}</td>
                         <td style="text-align:center;">                           <!--forloop.parentloop,外层循环-->
-                            <a class="edit-single-host" href="/asset-{{ row.device_type_id }}-{{ row.id }}.html">
+                            <a class="single-host-detail" href="/asset-{{ row.device_type_id }}-{{ row.id }}.html">
                                 <span class="fa fa-search" aria-hidden="true">查看详细</span>
                             </a> |
                             <a class="edit-single-host">
@@ -157,7 +125,7 @@
             <h4 class="modal-title" id="myModalLabel" style="text-align: center;">编辑主机</h4>
           </div>
           <div class="modal-body">
-              <form class="form-horizontal" id="edit-form" method="POST" action="/host/" style="text-align: center;">
+              <form class="form-horizontal" id="edit-form" method="POST" action="/asset.html" style="text-align: center;">
                   {% csrf_token %}
                   <input type="text" name="hid" style="display:none" />
                   <div class="form-group">
@@ -205,16 +173,18 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title">确定要删除吗？</h4>
+            <h4 class="modal-title">确定要删除吗？</h4><br />
+              <p>与该资产相关联的网卡、硬盘、内存和日志等将全部被删除！<br/> &nbsp;</p>
           </div>
           <div class="modal-body" style="text-align: center;">
-              <form id="del_form" method="POST" action="/delete_host/">
+              <form id="del_form" action="/asset.html">
                 {% csrf_token %}
                 <input id="del_host_id" type="text" name="hid" style="display:none" />
-                <input type="submit" value="删除" />
-                <!--<a id="ajax_submit_del">确认删除</a>-->
-                <input type="button" value="取消" data-dismiss="modal" />
+{#                <input type="submit" class="btn btn-danger" value="删除" />#}
+                  <input id="ajax_submit_del" type="button" class="btn btn-danger" value="确认删除"/>
+                <input type="button" class="btn btn-default" value="取消" data-dismiss="modal" />
               </form>
+
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
@@ -224,6 +194,7 @@
 
 
 {% block js %}
+    <script src="/static/js/jquery.cookie.js"></script>
     <script>
         $.ajaxSetup({
             beforeSend: function(xhr,settings){
@@ -330,23 +301,27 @@
         $('.delete—single-host').click(function(){
             //console.log('111');
             var hid = $(this).parent().parent().attr('hid'); //点删除按钮时拿到当前主机的id
-            //console.log(hid);
+            console.log(hid);
             $('#del_form').find('input[name="hid"]').val(hid); //塞到表单里，这样后台就可以取到要删除的这行数据
 
         })
         $('#ajax_submit_del').click(function () {
             $.ajax({
-                url: '/delete_host/',
-                type: 'POST',
+                url: '/asset.html',
+                type: 'DELETE',
                 //data: {'hid': $('#del_host_id').val()},
                 data: $('#del_form').serialize(),
                 dataType: 'JSON',
                 traditional: true,
-                success: function (obj) {
-                    console.log(obj)
+                success: function (response) {
+                    if (response.status) {
+                        location.reload(); //js刷新页面
+                    } else {
+                        alert(response.message);
+                    }
                 },
                 error: function () {
-
+                    alert('请求异常');
                 }
             })
         })
@@ -359,6 +334,11 @@
     <style>
         .operation {
             margin-top: 10px;
+        }
+        .single-host-detail {
+            text-decoration:none;
+            color: #086ed5;
+            cursor: pointer;
         }
         .edit-single-host {
             text-decoration:none;

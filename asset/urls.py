@@ -13,7 +13,7 @@ urlpatterns = [
     url(r'^index.html$', home.IndexView.as_view()),
 
     url(r'^asset.html$', views.AssetView.as_view()),
-    url(r'^delete_host/', views.delete_host),
+    # url(r'^delete_host/', views.delete_host),
     url(r'^edit_host/', views.edit_host),
 
     url(r'^software/', views.software),

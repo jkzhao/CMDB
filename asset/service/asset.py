@@ -79,9 +79,10 @@ class Asset(object):
     def delete_assets(request):
         response = BaseResponse()
         try:
-            delete_dict = QueryDict(request.body, encoding='utf-8')
-            id_list = delete_dict.getlist('id_list')
-            models.Asset.objects.filter(id__in=id_list).delete()
+            hid = request.POST.get('hid')
+            print(hid, type(hid))  # "["1","2"]"  "1,2"
+            hid_list = hid.split(",")
+            models.Asset.objects.filter(id__in=hid_list).delete()
             response.message = '删除成功'
         except Exception as e:
             response.status = False

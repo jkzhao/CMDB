@@ -91,10 +91,10 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cmdb', #数据库名，这个数据库django是不能创建的，得你自己在数据库里创建
+        'NAME': 'newcmdb', #数据库名，这个数据库django是不能创建的，得你自己在数据库里创建
         'USER': 'root',
-        'PASSWORD': 'wisedu123',
-        'HOST': '116.62.124.150',
+        'PASSWORD': '123456',
+        'HOST': '172.16.206.30',
         'PORT': '3306',
     }
 }
@@ -156,4 +156,4 @@ SESSION_SAVE_EVERY_REQUEST = True                       # 是否每次请求都�
 # API authentication
 ASSET_AUTH_KEY = '299095cc-1330-11e5-b06a-a45e60bec08b'
 ASSET_AUTH_HEADER_NAME = 'HTTP_AUTH-KEY' #AUTH和KEY之间一定不能用下划线，用-。http请求头不能用下划线，从request中获取到的是HTTP_AUTH_KEY
-ASSET_AUTH_TIME = 2  # 2s内
+ASSET_AUTH_TIME = 10  # 2s内 #注意客户端和服务器端时间要保持一致

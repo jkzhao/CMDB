@@ -56,16 +56,11 @@ class AssetView(View):
         # 但是不能用redirect()
 
 
-def delete_host(request):
-    '''删除单个主机记录和批量删除主机记录'''
-    hid = request.POST.get('hid')
-    # print(hid,type(hid)) #"["1","2"]"  "1,2"
-    hid_list = hid.split(",")
-    for hid in hid_list:
-        #print(hid,type(hid))
-        models.Asset.objects.filter(id=hid).first().delete()
+    def delete(self, request):
+        '''删除单个主机记录和批量删除主机记录'''
+        response = asset.delete_assets(request)
 
-    return redirect('/host')
+        return redirect('/asset.html')
 
 def edit_host(request):
     '''编辑主机'''
