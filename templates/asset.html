@@ -299,7 +299,7 @@
 
         //删除单个主机
         $('.delete—single-host').click(function(){
-            //console.log('111');
+            console.log('111');
             var hid = $(this).parent().parent().attr('hid'); //点删除按钮时拿到当前主机的id
             console.log(hid);
             $('#del_form').find('input[name="hid"]').val(hid); //塞到表单里，这样后台就可以取到要删除的这行数据

@@ -148,7 +148,7 @@ class Server(models.Model):
 
     hostname = models.CharField(max_length=128, unique=True)
     # 下面3个是主板的信息
-    sn = models.CharField('SN号', max_length=64, db_index=True)
+    sn = models.CharField('SN号', max_length=64, db_index=True, blank=True)
     manufacturer = models.CharField(verbose_name='制造商', max_length=64, null=True, blank=True)
     model = models.CharField('型号', max_length=64, null=True, blank=True)
 

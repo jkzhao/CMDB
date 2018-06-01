@@ -7,6 +7,7 @@ from django.db.models import Q
 from repository import models
 from utils.response import BaseResponse
 from django.http.request import QueryDict
+from django.http import QueryDict
 
 class Asset(object):
     extra_select = {
@@ -79,7 +80,9 @@ class Asset(object):
     def delete_assets(request):
         response = BaseResponse()
         try:
-            hid = request.POST.get('hid')
+            # hid = request.body.get('hid')
+            delete = QueryDict(request.body)
+            hid = delete.get('hid')
             print(hid, type(hid))  # "["1","2"]"  "1,2"
             hid_list = hid.split(",")
             models.Asset.objects.filter(id__in=hid_list).delete()
@@ -91,6 +94,7 @@ class Asset(object):
 
     @staticmethod
     def put_assets(request):
+        """修改主机"""
         response = BaseResponse()
         try:
             response.error = []

@@ -8,6 +8,7 @@ import json
 from django.utils.decorators import method_decorator
 from asset.service import asset
 from django.http import JsonResponse
+from asset.service.asset import Asset
 
 '''
 资产管理
@@ -58,9 +59,16 @@ class AssetView(View):
 
     def delete(self, request):
         '''删除单个主机记录和批量删除主机记录'''
-        response = asset.delete_assets(request)
+        response = Asset.delete_assets(request)
+        # print(JsonResponse(response.__dict__))
 
-        return redirect('/asset.html')
+        return JsonResponse(response.__dict__)
+        # return redirect('/asset.html')
+
+    def put(self, request):
+        '''编辑主机'''
+        response =  Asset.put_assets(request)
+        return JsonResponse(response.__dict__)
 
 def edit_host(request):
     '''编辑主机'''
