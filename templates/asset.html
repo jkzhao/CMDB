@@ -29,7 +29,7 @@
             <tbody id="tb">
 
                 {% for row in response.data.data_list %}
-                    <tr hid="{{ row.id }}" bid="{{ row.business_unit_id }}" eid="{{ row.idc_id }}"> <!--自定义属性，用户在页面上也看不到这两个值，主机id、业务线id、机房id-->
+                    <tr hid="{{ row.id }}" bid="{{ row.business_unit_id }}" eid="{{ row.idc_id }}" asset_status_id="{{ row.device_status_id }}"> <!--自定义属性，用户在页面上也看不到这两个值，主机id、业务线id、机房id-->
                         <td style="text-align: center">
                             <input type="checkbox" />
                         </td>
@@ -129,30 +129,41 @@
                   {% csrf_token %}
                   <input type="text" name="hid" style="display:none" />
                   <div class="form-group">
-                    <label for="hostname" class="col-sm-2 control-label">主机名</label>
+                    <label for="cabinet_num" class="col-sm-2 control-label">机柜号</label>
                     <div class="col-sm-10">
-                      <input type="text" class="form-control" id="hostname" name="hostname" placeholder="hostname">
+                      <input type="text" class="form-control" id="cabinet_num" name="cabinet_num" placeholder="hostname">
                     </div>
                   </div>
                   <div class="form-group">
-                    <label for="IP" class="col-sm-2 control-label">IP地址</label>
+                    <label for="cabinet_order" class="col-sm-2 control-label">机柜中序号</label>
                     <div class="col-sm-10">
-                      <input type="text" class="form-control" id="ip" name="ip" placeholder="IP">
+                      <input type="text" class="form-control" id="cabinet_order" name="cabinet_order" placeholder="IP">
                     </div>
                   </div>
                   <div class="form-group">
                       <label for="business" style="padding-top: 7px;margin-bottom: 0;text-align: right;">所属业务线</label>
                       <select id="business_id" name="b_id" class="form-control" style="width: 470px;display: inline;margin-left: 23px;"> <!--业务线，只让选择-->
-                          {% for op in b_list %}
-                              <option value="{{ op.id }}">{{ op.caption }}</option>
+                          {% load get_item %}
+                          {% for business in response.data.global_dict|get_item:'business_unit_list' %}
+                              <option value="{{ business.id }}">{{ business.name }}</option>
                           {% endfor %}
                       </select>
                   </div>
                   <div class="form-group">
                       <label for="e" style="padding-top: 7px;margin-bottom: 0;margin-left: 12px;text-align: right;">所在机房</label>
                       <select id="engineroom_id" name="e_id" class="form-control" style="width: 470px;display: inline;margin-left: 23px;"> <!--所在机房，只让选择-->
-                          {% for op in e_list %}
-                              <option value="{{ op.id }}">{{ op.name }}</option>
+                          {% load get_item %}
+                          {% for engineroom in response.data.global_dict|get_item:'idc_list' %}
+                              <option value="{{ engineroom.id }}">{{ engineroom.name }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+                  <div class="form-group">
+                      <label for="asset-status" style="padding-top: 7px;margin-bottom: 0;margin-left: 12px;text-align: right;">资产状态</label>
+                      <select id="asset_status_id" name="asset_status_id" class="form-control" style="width: 470px;display: inline;margin-left: 23px;"> <!--资产状态，只让选择-->
+                          {% load get_item %}
+                          {% for asset_status in response.data.global_dict|get_item:'device_status_list' %}
+                              <option value="{{ asset_status.id }}">{{ asset_status.name }}</option>
                           {% endfor %}
                       </select>
                   </div>
@@ -246,31 +257,36 @@
             var hid = $(this).parent().parent().attr('hid'); //点编辑按钮时拿到当前主机的id
             var bid = $(this).parent().parent().attr('bid'); //点编辑按钮时拿到当前主机所在业务线的id
             var eid = $(this).parent().parent().attr('eid'); //点编辑按钮时拿到当前主机所在机房的id
-            var hostname = $(this).parent().prev().prev().prev().prev().text();
-            var ip = $(this).parent().prev().prev().prev().text();
-            //console.log(hid);
-            //console.log(hostname);
-            //console.log(ip);
+            var asset_status_id = $(this).parent().parent().attr('asset_status_id'); //点编辑按钮时拿到当前主机所在机房的id
+            var cabinet_num = $(this).parent().prev().prev().prev().prev().text();
+            var cabinet_order = $(this).parent().prev().prev().prev().text();
+            //console.log(cabinet_num);
+            //console.log(cabinet_order);
 
             $('#edit-form #business_id').val(bid);
             $('#edit-form #engineroom_id').val(eid);
+            $('#edit-form #asset_status_id').val(asset_status_id);
             $('#edit-form').find('input[name="hid"]').val(hid); //放到那个隐藏的input框中
-            $('#edit-form').find('[id="hostname"]').val(hostname);
-            $('#edit-form').find('[id="ip"]').val(ip);
+            $('#edit-form').find('[id="cabinet_num"]').val(cabinet_num);
+            $('#edit-form').find('[id="cabinet_order"]').val(cabinet_order);
         })
         $('#ajax_edit_submit').click(function(){
             $.ajax({
-                url: "/edit_host/",
-                type: 'POST',
+                url: "/asset.html",
+                type: 'PUT',
                 data: $('#edit-form').serialize(),
-                success: function(data){
-                    console.log(data);
-                    var obj = JSON.parse(data); //把字符串转换为对象
-                    if(obj.status){
+                success: function(response){
+                    console.log(response);
+                    //var obj = JSON.parse(data); //把字符串转换为对象
+                    if(response.status){
                         location.reload(); //js刷新页面
                     }else{
-                        $('#edit-form #error_msg').text(obj.error);
+                        $('#edit-form #error_msg').text(response.error);
                     }
+                },
+                error: function () {
+                    //$.Hide('#shade,#modal_delete');
+                    alert('请求异常');
                 }
             })
         });

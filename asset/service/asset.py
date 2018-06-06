@@ -38,6 +38,7 @@ class Asset(object):
         return list(values) #<class 'list'>: [{'id': 2, 'name': '二手车'}, {'id': 3, 'name': '咨询'}, {'id': 1, 'name': '车商城'}]
 
     def fetch_assets(self, request):
+        """获取资产"""
         response = BaseResponse()
         try:
             ret = {}
@@ -78,11 +79,12 @@ class Asset(object):
 
     @staticmethod
     def delete_assets(request):
+        """删除资产"""
         response = BaseResponse()
         try:
             # hid = request.body.get('hid')
-            delete = QueryDict(request.body)
-            hid = delete.get('hid')
+            delete_dict = QueryDict(request.body)
+            hid = delete_dict.get('hid')
             print(hid, type(hid))  # "["1","2"]"  "1,2"
             hid_list = hid.split(",")
             models.Asset.objects.filter(id__in=hid_list).delete()
@@ -94,26 +96,36 @@ class Asset(object):
 
     @staticmethod
     def put_assets(request):
-        """修改主机"""
+        """修改资产"""
         response = BaseResponse()
         try:
-            response.error = []
+            row_dict = {}
             put_dict = QueryDict(request.body, encoding='utf-8')
-            update_list = json.loads(put_dict.get('update_list'))
-            error_count = 0
-            for row_dict in update_list:
-                nid = row_dict.pop('nid')
-                num = row_dict.pop('num')
-                try:
-                    models.Asset.objects.filter(id=nid).update(**row_dict)
-                except Exception as e:
-                    response.error.append({'num': num, 'message': str(e)})
-                    response.status = False
-                    error_count += 1
-            if error_count:
-                response.message = '共%s条,失败%s条' % (len(update_list), error_count,)
-            else:
-                response.message = '更新成功'
+            hid = put_dict.get('hid')
+            #方式一
+            # cabinet_num = put_dict.get('cabinet_num')
+            # cabinet_order = put_dict.get('cabinet_order')
+            # b_id = put_dict.get('b_id')
+            # e_id = put_dict.get('e_id')
+            # asset_status_id = put_dict.get('asset_status_id')
+
+            # obj = models.Asset.objects.filter(id=hid).first()
+            # obj.cabinet_num = cabinet_num
+            # obj.cabinet_order = cabinet_order
+            # obj.business_unit_id = b_id
+            # obj.idc_id = e_id
+            # obj.device_status_id = asset_status_id
+            # obj.save()
+
+            #方式二
+            row_dict['cabinet_num'] = put_dict.get('cabinet_num')
+            row_dict['cabinet_order'] = put_dict.get('cabinet_order')
+            row_dict['business_unit_id'] = put_dict.get('b_id')
+            row_dict['idc_id'] = put_dict.get('e_id')
+            row_dict['device_status_id'] = put_dict.get('asset_status_id')
+            models.Asset.objects.filter(id=hid).update(**row_dict)
+
+            response.message = '更新成功'
         except Exception as e:
             response.status = False
             response.message = str(e)
@@ -121,6 +133,7 @@ class Asset(object):
 
     @staticmethod
     def assets_detail(device_type_id, asset_id):
+        """资产详细信息"""
         response = BaseResponse()
         try:
             if device_type_id == '1':

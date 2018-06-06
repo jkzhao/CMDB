@@ -67,39 +67,8 @@ class AssetView(View):
 
     def put(self, request):
         '''编辑主机'''
-        response =  Asset.put_assets(request)
+        response = Asset.put_assets(request)
         return JsonResponse(response.__dict__)
-
-def edit_host(request):
-    '''编辑主机'''
-    hid = request.POST.get('hid')
-    # print(hid)
-    obj = models.Host.objects.filter(id=hid).first()
-    result = {'status': True, 'error': None, 'data': None}
-    try:  # 因为这里面的代码有可能出错
-        h = request.POST.get('hostname')
-        i = request.POST.get('ip')
-        b = request.POST.get('b_id')
-        e = request.POST.get('e_id')
-        if h:
-            pass
-            if i and is_valid_ipv4_address(i): #更新
-                obj.hostname = h
-                obj.ip = i
-                obj.b_id = b
-                obj.e_id = e
-                obj.save()
-            else:
-                result['status'] = False
-                result['error'] = "IP地址格式有误"
-        else:
-            result['status'] = False
-            result['error'] = "请输入主机名"
-    except Exception as e:
-        result['status'] = False
-        result['error'] = '请求错误'
-
-    return HttpResponse(json.dumps(result))
 
 
 import socket

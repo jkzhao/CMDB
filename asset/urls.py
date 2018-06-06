@@ -14,7 +14,7 @@ urlpatterns = [
 
     url(r'^asset.html$', views.AssetView.as_view()),
     # url(r'^delete_host/', views.delete_host),
-    url(r'^edit_host/', views.edit_host),
+    # url(r'^edit_host/', views.edit_host),
 
     url(r'^software/', views.software),
     url(r'^business/', views.business),
