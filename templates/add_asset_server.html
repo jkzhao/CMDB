@@ -1,0 +1,85 @@
+{% extends 'layout/_layout.html' %}
+
+{% block title %}添加服务器{% endblock %}
+
+{% block content %}
+    <h1 class="page-header" style="font-size: 28px;">添加服务器</h1>
+    <form class="form-horizontal" id="add-server-form" method="POST" action="/add_asset_server.html">
+        {% csrf_token %}
+        {% if response.status %}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">对应资产:</label>
+            <div class="col-sm-10">
+                <select class="form-control" style="width: auto;" name="asset">
+                  {% for asset in response.data %}
+                      <option value="{{ asset.id }}">{{ asset.idc.name }}-{{ asset.cabinet_num }}-{{ asset.cabinet_order }}</option>
+                  {% endfor %}
+                </select>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">主机名:</label>
+            <div class="col-sm-10">
+              <input type="text" name="hostname" class="form-control" placeholder="主机名">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-left: 95px;">
+{#        <input type="submit" value="提交" /> <!--提交只能提交表单，讲完ajax以后才可以不用表单提交-->#}
+            <input id="ajax_add_submit" type="button" class="btn btn-primary" value="提交">
+{#            <a class="btn btn-primary"  href="/asset.html" >返回</a>#}
+        </div>
+    </form>
+
+{% endblock %}
+
+
+{% block js %}
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script>
+        $.ajaxSetup({
+            beforeSend: function(xhr,settings){
+                xhr.setRequestHeader('X-CSRFtoken', $.cookie('csrftoken'));
+            }
+        });
+
+        $(document).ready(function(){
+            $('.pg-content,.item,#host').removeClass('hide');
+        });
+
+        //添加服务器
+        $('#ajax_add_submit').click(function(){
+            $.ajax({
+                url: "/add_asset_server.html",
+                type: 'POST',
+                //data: {'hostname': $('#host').val(), 'ip': $('#ip').val(), 'port': $('#port').val(), 'b_id': $('#sel').val()},
+                data: $('#add-server-form').serialize(),
+                success: function (response) {
+                    if (response.status) {
+                        window.location.href = "asset.html";//添加服务器成功后跳转资产页面
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    alert('请求异常');
+                }
+            })
+        });
+
+    </script>
+
+{% endblock %}
+
+
+{% block css %}
+    <link href="/static/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+
+{% endblock %}
+
+
+
+
+

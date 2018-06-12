@@ -10,7 +10,7 @@ from django.http.request import QueryDict
 from django.http import QueryDict
 
 class Asset(object):
-    extra_select = {
+    asset_extra_select = {
         'server_title': 'select hostname from repository_server where repository_server.asset_id=repository_asset.id and repository_asset.device_type_id=1',
         'network_title': 'select management_ip from repository_networkdevice where repository_networkdevice.asset_id=repository_asset.id and repository_asset.device_type_id=2',
     }
@@ -42,7 +42,7 @@ class Asset(object):
         response = BaseResponse()
         try:
             ret = {}
-            asset_list = models.Asset.objects.all().extra(select=self.extra_select).values()
+            asset_list = models.Asset.objects.all().extra(select=self.asset_extra_select).values()
             # print("asset_list: %s" % asset_list)
             for ast in asset_list:
                 for device_status in self.device_status_list:
@@ -77,6 +77,20 @@ class Asset(object):
 
         return response
 
+    def fetch_servers(self, id):
+        """获取服务器资产"""
+        response = BaseResponse()
+        try:
+            asset = models.Asset.objects.filter(id=id)
+
+            response.data = asset
+            response.message = '获取成功'
+        except Exception as e:
+            response.status = False
+            response.message = str(e)
+
+        return response
+
     @staticmethod
     def delete_assets(request):
         """删除资产"""
@@ -89,6 +103,54 @@ class Asset(object):
             hid_list = hid.split(",")
             models.Asset.objects.filter(id__in=hid_list).delete()
             response.message = '删除成功'
+        except Exception as e:
+            response.status = False
+            response.message = str(e)
+        return response
+
+    @staticmethod
+    def add_assets(request):
+        """添加资产"""
+        response = BaseResponse()
+        row_dict = {}
+        try:
+            add_dict = QueryDict(request.body)
+            row_dict['device_type_id'] = add_dict.get('asset_type')
+            row_dict['device_status_id'] = add_dict.get('asset_status')
+            row_dict['cabinet_num'] = add_dict.get('cabinet_num')
+            row_dict['cabinet_order'] = add_dict.get('cabinet_order')
+            row_dict['idc_id'] = add_dict.get('idc')
+            row_dict['business_unit_id'] = add_dict.get('business_unit')
+            # row_dict['tag_id'] = add_dict.get('tag')
+            latest_date_time = add_dict.get('latest_date')
+            row_dict['latest_date'] = latest_date_time.split()[0]
+
+            obj = models.Asset.objects.create(**row_dict)
+            response.message = '添加成功'
+            response.data = obj.id
+        except Exception as e:
+            response.status = False
+            response.message = str(e)
+        return response
+
+    @staticmethod
+    def add_server(request):
+        """添加服务器"""
+        response = BaseResponse()
+        row_dict = {}
+        try:
+            add_dict = QueryDict(request.body)
+            row_dict['asset_id'] = add_dict.get('asset')
+            hostname = add_dict.get('hostname')
+            hostname_list = models.Server.objects.all().values_list('hostname', flat=True)
+
+            if hostname in hostname_list:
+                response.status = False
+                response.message = '主机名重复，请重新输入主机名'
+            else:
+                row_dict['hostname'] = hostname
+                models.Server.objects.create(**row_dict)
+                response.message = '添加成功'
         except Exception as e:
             response.status = False
             response.message = str(e)

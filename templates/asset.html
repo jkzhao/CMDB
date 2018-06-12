@@ -63,59 +63,6 @@
     </div>
     {% endif %}
 
-
-    <!--Bootstrap add modal-->
-    <div id="addModal" class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel" style="text-align: center;">添加主机</h4>
-          </div>
-          <div class="modal-body">
-              <form class="form-horizontal" id="add-form" method="POST" action="/host/" style="text-align: center;">
-                  {% csrf_token %}
-                  <div class="form-group">
-                    <label for="host" class="col-sm-2 control-label">主机名</label>
-                    <div class="col-sm-10">
-                      <input type="text" class="form-control" id="hostname" name="hostname" placeholder="hostname">
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="ip" class="col-sm-2 control-label">IP地址</label>
-                    <div class="col-sm-10">
-                      <input type="text" class="form-control" id="ip" name="ip" placeholder="IP">
-                    </div>
-                  </div>
-                  <div class="form-group">
-                      <label for="business" style="padding-top: 7px;margin-bottom: 0;text-align: right;">所属业务线</label>
-                      <select id="business_id" name="b_id" class="form-control" style="width: 470px;display: inline;margin-left: 23px;"> <!--业务线，只让选择-->
-                          {% for op in b_list %}
-                              <option value="{{ op.id }}">{{ op.caption }}</option>
-                          {% endfor %}
-                      </select>
-                  </div>
-                  <div class="form-group">
-                      <label for="e" style="padding-top: 7px;margin-bottom: 0;margin-left: 12px;text-align: right;">所在机房</label>
-                      <select id="engineroom_id" name="e_id" class="form-control" style="width: 470px;display: inline;margin-left: 23px;"> <!--所在机房，只让选择-->
-                          {% for op in e_list %}
-                              <option value="{{ op.id }}">{{ op.name }}</option>
-                          {% endfor %}
-                      </select>
-                  </div>
-              </form>
-          </div>
-          <div class="modal-footer" style="text-align: center;">
-              <!--<input type="submit" value="提交" />--> <!--提交只能提交表单，讲完ajax以后才可以不用表单提交-->
-              <input id="ajax_add_submit" type="button" class="btn btn-primary" value="提交">
-              <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-              <span id="error_msg" style="color: red"></span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
     <!-- Bootstrap edit modal -->
     <div id="editModal" class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
       <div class="modal-dialog" role="document">
@@ -232,25 +179,6 @@
                 $(this).prop('checked',v);
             })
         }
-
-        //添加主机
-        $('#ajax_add_submit').click(function(){
-            $.ajax({
-                url: "/host/",
-                type: 'POST',
-                //data: {'hostname': $('#host').val(), 'ip': $('#ip').val(), 'port': $('#port').val(), 'b_id': $('#sel').val()},
-                data: $('#add-form').serialize(),
-                success: function(data){
-                    //console.log(data);
-                    var obj = JSON.parse(data); //把字符串转换为对象
-                    if(obj.status){
-                        location.reload(); //js刷新页面
-                    }else{
-                        $('#add-form #error_msg').text(obj.error);
-                    }
-                }
-            })
-        });
 
         //编辑主机
         $('.edit-single-host').click(function(){

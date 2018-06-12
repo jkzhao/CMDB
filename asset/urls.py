@@ -13,14 +13,14 @@ urlpatterns = [
     url(r'^index.html$', home.IndexView.as_view()),
 
     url(r'^asset.html$', views.AssetView.as_view()),
-    # url(r'^delete_host/', views.delete_host),
-    # url(r'^edit_host/', views.edit_host),
+    url(r'^add_asset.html$', views.AddAssetView.as_view()),
+    url(r'^add_asset_server.html$', views.AddServerView.as_view()),
 
-    url(r'^software/', views.software),
-    url(r'^business/', views.business),
+    url(r'^software.html$', views.software),
+    url(r'^business.html$', views.business),
     url(r'^user.html$', views.user),
 
-    url(r'^environment/', views.environment),
+    url(r'^environment.html$', views.environment),
 
     url(r'^asset-(?P<device_type_id>\d+)-(?P<asset_nid>\d+).html$', views.AssetDetailView.as_view()),
 

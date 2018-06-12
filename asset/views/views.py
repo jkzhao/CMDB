@@ -24,44 +24,11 @@ class AssetView(View):
         return render(request, 'asset.html', {"response": response, 'current_user': request.session['username']})
         #return render(request, 'asset.html', {"assets": respone.data, 'current_user': request.session['username']})
 
-    def post(self, request, *args, **kwargs):
-        result = {'status': True, 'error': None, 'data': None}
-        try:  # 因为这里面的代码有可能出错
-            h = request.POST.get('hostname')
-            i = request.POST.get('ip')
-            b = request.POST.get('b_id')
-            e = request.POST.get('e_id')
-            print(h)
-            print(i)
-            if h:
-                pass
-                if i and is_valid_ipv4_address(i):
-                    # new_host = models.Host(hostname=h,ip=i,b_id=b,e_id=e)
-                    # new_host.save() #这两句和下面那句等效
-                    models.Host.objects.create(hostname=h,
-                                               ip=i,
-                                               b_id=b,
-                                               e_id=e)
-                else:
-                    result['status'] = False
-                    result['error'] = "IP地址格式有误"
-            else:
-                result['status'] = False
-                result['error'] = "请输入主机名"
-        except Exception as e:
-            result['status'] = False
-            result['error'] = '请求错误'
-
-        return HttpResponse(json.dumps(result))  # ajax请求返回就写HttpResponse，HttpResponse()里面是字符串
-        # 其实也是能用render()，一般要渲染一些东西返回给用户，但是前端拿到html，没有办法JSON.parse()，必须形似字典才行。
-        # 但是不能用redirect()
-
-
     def delete(self, request):
         '''删除单个主机记录和批量删除主机记录'''
         response = Asset.delete_assets(request)
-        # print(JsonResponse(response.__dict__))
 
+        # print(JsonResponse(response.__dict__))
         return JsonResponse(response.__dict__)
         # return redirect('/asset.html')
 
@@ -71,22 +38,34 @@ class AssetView(View):
         return JsonResponse(response.__dict__)
 
 
-import socket
-def is_valid_ipv4_address(address):
-    '''验证ip地址格式是否正确'''
-    try:
-        socket.inet_pton(socket.AF_INET, address)
-    except AttributeError:  # no inet_pton here, sorry
-        try:
-            socket.inet_aton(address)
-        except socket.error:
-            return False
-        return address.count('.') == 3
-    except socket.error:  # not a valid address
-        return False
+class AddAssetView(View):
+    def get(self, request, *args, **kwargs):
+        asset = Asset()
+        ret = {}
+        ret['idc_list'] = asset.idc_list
+        ret['business_unit_list'] = asset.business_unit_list
+        ret['device_type_list'] = asset.device_type_list
+        ret['device_status_list'] = asset.device_status_list
 
-    return True
+        return render(request, 'add_asset.html', {'result': ret})
 
+    def post(self, request):
+        response = Asset.add_assets(request)
+        return JsonResponse(response.__dict__)
+
+class AddServerView(View):
+    def get(self, request, *args, **kwargs):
+        id = request.GET.get('id')
+        # print(id)
+        asset = Asset()
+        response = asset.fetch_servers(id)
+
+        return render(request, 'add_asset_server.html', {'response': response})
+
+    def post(self, request):
+        response = Asset.add_server(request)
+
+        return JsonResponse(response.__dict__)
 
 
 @auth

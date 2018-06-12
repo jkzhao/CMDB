@@ -1,0 +1,158 @@
+{% extends 'layout/_layout.html' %}
+
+{% block title %}添加资产{% endblock %}
+
+{% block content %}
+    <h1 class="page-header" style="font-size: 28px;">添加资产</h1>
+    <form class="form-horizontal" id="add-form" method="POST" action="/asset.html">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">设备类型:</label>
+            <div class="col-sm-10">
+                <select class="form-control" style="width: auto;" name="asset_type">
+                  {% for asset_type in result.device_type_list %}
+                      <option value="{{ asset_type.id }}">{{ asset_type.name }}</option>
+                  {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">设备状态:</label>
+            <div class="col-sm-10">
+                <select class="form-control" style="width: auto;" name="asset_status">
+                  {% for asset_status in result.device_status_list %}
+                      <option value="{{ asset_status.id }}">{{ asset_status.name }}</option>
+                  {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">机柜号:</label>
+            <div class="col-sm-10">
+              <input type="text" name="cabinet_num" class="form-control" placeholder="机柜号">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">机柜中序号:</label>
+            <div class="col-sm-10">
+              <input type="text" name="cabinet_order" class="form-control" placeholder="机柜中序号">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">IDC机房:</label>
+            <div class="col-sm-10">
+                <select class="form-control" style="width: auto;" name="idc">
+                  {% for idc in result.idc_list %}
+                      <option value="{{ idc.id }}">{{ idc.name }}</option>
+                  {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">属于的业务线:</label>
+            <div class="col-sm-10">
+                <select class="form-control" style="width: auto;" name="business_unit">
+                  {% for business_unit in result.business_unit_list %}
+                      <option value="{{ business_unit.id }}">{{ business_unit.name }}</option>
+                  {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">标签:</label>
+            <div class="col-sm-10">
+                <select class="form-control" style="width: auto;" name="tag">
+
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+                <label for="dtp_input1" class="col-sm-2 control-label">最后修改时间:</label>
+{#                <div class="input-group date form_datetime col-md-5" data-date="1979-09-16T05:25:07Z" data-date-format="dd MM yyyy - HH:ii p" data-link-field="dtp_input1">#}
+                <div class="input-group date form_datetime col-sm-5" data-date="1979-09-16T05:25:07Z" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+{#                <div class="input-group date col-sm-5" data-link-field="dtp_input1">#}
+                    <input class="form-control" size="16" type="text" value="" readonly>
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                </div>
+                <input type="hidden" name="latest_date" id="dtp_input1" value="" /><br/>
+            </div>
+
+        <div class="form-group" style="margin-left: 95px;">
+{#        <input type="submit" value="提交" /> <!--提交只能提交表单，讲完ajax以后才可以不用表单提交-->#}
+            <input id="ajax_add_submit" type="button" class="btn btn-primary" value="提交">
+            <a class="btn btn-primary"  href="/asset.html" >返回</a>
+        </div>
+    </form>
+
+{% endblock %}
+
+
+{% block js %}
+    <script src="/static/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script>
+        $('.form_datetime').datetimepicker({
+            weekStart: 0, //一周从哪一天开始
+            todayBtn:  1, //
+            autoclose: 1,
+            todayHighlight: 1,
+            startView: 2,
+            forceParse: 0,
+            showMeridian: 1,
+            minView: 2,
+            maxView: 4,
+        });
+
+        $.ajaxSetup({
+            beforeSend: function(xhr,settings){
+                xhr.setRequestHeader('X-CSRFtoken', $.cookie('csrftoken'));
+            }
+        });
+
+        $(document).ready(function(){
+            $('.pg-content,.item,#host').removeClass('hide');
+        });
+
+        //添加资产
+        $('#ajax_add_submit').click(function(){
+            $.ajax({
+                url: "/add_asset.html",
+                type: 'POST',
+                //data: {'hostname': $('#host').val(), 'ip': $('#ip').val(), 'port': $('#port').val(), 'b_id': $('#sel').val()},
+                data: $('#add-form').serialize(),
+                success: function (response) {
+                    if (response.status) {
+                        //localStorage.setItem('asset', response.data);
+                        window.location.href = "add_asset_server.html?id="+response.data;//成功后跳转到添加服务器页面
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    alert('请求异常');
+                }
+            })
+        });
+
+    </script>
+
+{% endblock %}
+
+
+{% block css %}
+    <link href="/static/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+
+{% endblock %}
+
+
+
+
+
